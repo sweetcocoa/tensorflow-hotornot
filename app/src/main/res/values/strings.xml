@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">HotOrNot</string>
+    <string name="app_name">WhySolo</string>
 
     <string name="hot">hot</string>
     <string name="not">not</string>
 
     <string name="take_photo">Take photo</string>
+    <string name="import_photo">Import photo</string>
 </resources>

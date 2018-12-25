@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item
+        android:id="@+id/import_photo"
+        android:icon="@drawable/ic_photo_camera_white_24dp"
+        android:title="@string/import_photo"
+        app:showAsAction="ifRoom" />
     <item android:id="@+id/take_photo"
         android:icon="@drawable/ic_photo_camera_white_24dp"
         android:title="@string/take_photo"

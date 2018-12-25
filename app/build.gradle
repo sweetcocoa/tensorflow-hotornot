@@ -7,7 +7,7 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        applicationId "com.makor.hotornot"
+        applicationId "io.github.sweetcocoa"
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -23,5 +23,8 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
     implementation "com.android.support:appcompat-v7:$versions.support"
+    // Face Detection :: https://codelabs.developers.google.com/codelabs/face-detection/index.html?index=..%2F..index#4
+//    implementation 'com.google.android.gms:play-services:7.8'
+    implementation 'com.google.firebase:firebase-ml-vision-face-model:17.0.2'
     implementation "org.tensorflow:tensorflow-android:$versions.tensorflow"
 }

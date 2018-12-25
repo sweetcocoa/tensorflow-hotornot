@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -14,6 +15,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+
 import com.makor.hotornot.classifier.*
 import com.makor.hotornot.classifier.tensorflow.ImageClassifierFactory
 import com.makor.hotornot.utils.getCroppedBitmap
@@ -21,8 +23,12 @@ import com.makor.hotornot.utils.getUriFromFilePath
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
+import android.widget.Toast
+import java.net.URI
+
 private const val REQUEST_PERMISSIONS = 1
 private const val REQUEST_TAKE_PICTURE = 2
+private const val REQUEST_IMPORT_IMAGE = 3
 
 class MainActivity : AppCompatActivity() {
 
@@ -94,6 +100,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun importPhoto() {
+
+        var importPictureIntent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        importPictureIntent.type = "image/*"
+
+        if (importPictureIntent.resolveActivity(packageManager) != null) {
+//            importPictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, importPictureIntent!!.data)
+//            photoFilePath = importPictureIntent.data.path
+            startActivityForResult(importPictureIntent, REQUEST_IMPORT_IMAGE)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
         return true
@@ -103,16 +121,64 @@ class MainActivity : AppCompatActivity() {
         return if (item.itemId == R.id.take_photo) {
             takePhoto()
             true
-        } else {
+        } else if (item.itemId == R.id.import_photo){
+            importPhoto()
+            true
+        }
+        else {
             super.onOptionsItemSelected(item)
         }
     }
 
+    fun getRealPathFromURI(uri: Uri): String {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor!!.moveToFirst()
+        val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
+        return cursor.getString(idx)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val file = File(photoFilePath)
-        if (requestCode == REQUEST_TAKE_PICTURE && file.exists()) {
-            classifyPhoto(file)
+
+        if (requestCode == REQUEST_TAKE_PICTURE) {
+            val file = File(photoFilePath)
+            if (file.exists()) {
+                classifyPhoto(file)
+            }
         }
+        else if (requestCode == REQUEST_IMPORT_IMAGE) {
+            if (data != null) {
+                photoFilePath= getRealPathFromURI(data.data)
+                val file = File(photoFilePath)
+                if (file.exists()) {
+                    Toast.makeText(this, "Open Success : " + photoFilePath,  Toast.LENGTH_LONG).show()
+                    classifyPhoto(file)
+                }
+                else {
+                    Toast.makeText(this, "File open failed : " + photoFilePath,  Toast.LENGTH_LONG).show()
+                }
+
+
+
+            }
+        }
+
+
+
+
+//        if (file.exists()) {
+//            if (requestCode == REQUEST_TAKE_PICTURE) {
+//                classifyPhoto(file)
+//            }
+//            else if (requestCode == REQUEST_IMPORT_IMAGE) {
+//                classifyPhoto(file)
+//                Toast.makeText(this, "성공적으로 Image Import 되었다.",  Toast.LENGTH_LONG).show()
+//            }
+//        }
+//        else {
+//            if (requestCode == REQUEST_IMPORT_IMAGE) {
+//                Toast.makeText(this, "존재하지 않는 이미지 파일이다..",  Toast.LENGTH_LONG).show()
+//            }
+//        }
     }
 
     private fun classifyPhoto(file: File) {
@@ -126,6 +192,7 @@ class MainActivity : AppCompatActivity() {
         runInBackground(
                 Runnable {
                     val result = classifier.recognizeImage(croppedBitmap)
+//                    val result = Result(result = 15f.toString(), confidence = 0.7f)
                     showResult(result)
                 })
     }

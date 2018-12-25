@@ -1,8 +1,11 @@
 package com.makor.hotornot.classifier.tensorflow
 
 import android.graphics.Bitmap
+import com.google.android.gms.vision.Frame
+import com.google.android.gms.vision.face.FaceDetector
 import com.makor.hotornot.classifier.COLOR_CHANNELS
 import com.makor.hotornot.classifier.Classifier
+import com.makor.hotornot.classifier.IMAGE_SIZE
 import com.makor.hotornot.classifier.Result
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface
 import java.lang.Float
@@ -21,11 +24,21 @@ class ImageClassifier (
         private val tensorFlowInference: TensorFlowInferenceInterface
 ) : Classifier {
 
+
+//    init {
+//        val
+//    }
+
     override fun recognizeImage(bitmap: Bitmap): Result {
+        var detector = android.media.FaceDetector(IMAGE_SIZE,IMAGE_SIZE,1)
+//        var frame = Frame.Builder().setBitmap(bitmap).build()
+
         preprocessImageToNormalizedFloats(bitmap)
         classifyImageToOutputs()
         val outputQueue = getResults()
-        return outputQueue.poll()
+        val outputScore = getScore()
+//        return outputQueue.poll()
+        return Result(outputScore.toString(), outputScore)
     }
 
     private fun preprocessImageToNormalizedFloats(bitmap: Bitmap) {
@@ -49,6 +62,9 @@ class ImageClassifier (
         tensorFlowInference.fetch(outputName, results)
     }
 
+    private fun getScore(): kotlin.Float{
+        return results[0]
+    }
     private fun getResults(): PriorityQueue<Result> {
         val outputQueue = createOutputQueue()
         results.indices.mapTo(outputQueue) { Result(labels[it], results[it]) }
